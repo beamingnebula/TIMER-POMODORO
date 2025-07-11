@@ -19,7 +19,7 @@ Check out the live application: [Timer App](https://timerbymehboob.netlify.app/)
 
 ## 🛠️ Technologies Used
 
-- **Frontend**: HTML5, CSS3, JavaScript
+- **Frontend**: Completeley HTML
 - **Deployment**: Netlify
 - **Design**: Responsive web design principles
 
