@@ -101,7 +101,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 👤 Author
 
 **Mehboob**
-- GitHub: [@your-github-username](https://github.com/your-username)
+- GitHub: [@beamingnebula](https://github.com/beamingnebula)
 - Live App: [Timer App](https://timerbymehboob.netlify.app/)
 - [Download App](https://timerbymehboob.netlify.app/downloadpage.html)
 
