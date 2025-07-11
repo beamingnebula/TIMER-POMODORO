@@ -28,6 +28,8 @@ Check out the live application: [Timer App](https://timerbymehboob.netlify.app/)
 <!-- Add screenshots of your app here -->
 *Screenshots coming soon...*
 
+[![Watch on YouTube](https://img.youtube.com/vi/xBr5OaRW6Yw/0.jpg)](https://youtube.com/shorts/xBr5OaRW6Yw)
+
 ## 🎯 How to Use
 
 1. Visit the [live application](https://timerbymehboob.netlify.app/)
