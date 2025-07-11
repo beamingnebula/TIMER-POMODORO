@@ -117,6 +117,7 @@ If you have any questions or run into issues, please:
 - Open an issue on GitHub
 - Check the existing issues for solutions
 - Drop feedback in [Discord Server](https://discord.com/invite/CDAmXSaXQF/)
+  Website [Beaming Nebula](https://beamingmedia.netlify.app/)
 
 ---
 
