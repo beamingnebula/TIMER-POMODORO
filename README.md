@@ -100,7 +100,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 👤 Author
 
-**Mehboob**
+**Mehboob** for **[Beaming Media](https://beamingmedia.netlify.app/)**
 - GitHub: [@beamingnebula](https://github.com/beamingnebula)
 - Live App: [Timer App](https://timerbymehboob.netlify.app/)
 - [Download App](https://timerbymehboob.netlify.app/downloadpage.html)
