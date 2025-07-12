@@ -1,0 +1,61 @@
+{
+    "name": "timer_clock_icon",
+    "description": "A 3D stylized timer or clock icon with a blue base and gray circular dial.",
+    "style": "3D, soft pastel colors, minimal design",
+    "components": {
+        "base": {
+            "color": "blue",
+            "shape": "rounded square"
+        },
+        "dial": {
+            "color": "light gray",
+            "shape": "circle",
+            "center_pointer": {
+                "color": "white",
+                "orientation": "vertical",
+                "animation": {
+                    "type": "rotation",
+                    "direction": "clockwise",
+                    "speed": "1 rotation per 60 seconds",
+                    "easing": "linear",
+                    "loop": true
+                }
+            },
+            "dots": {
+                "color": "dark gray",
+                "count": 8,
+                "placement": "around the dial"
+            },
+            "red_dot": {
+                "color": "red",
+                "position": "top-center",
+                "animation": {
+                    "type": "pulse",
+                    "duration": "1s",
+                    "easing": "ease-in-out",
+                    "loop": true
+                }
+            }
+        }
+    },
+    "function": "Represents a timer or clock, typically used for scheduling, reminders, or time-based applications.",
+    "animations": [
+        {
+            "element": "center_pointer",
+            "type": "rotation",
+            "details": {
+                "direction": "clockwise",
+                "duration": "60s",
+                "loop": true
+            }
+        },
+        {
+            "element": "red_dot",
+            "type": "pulse",
+            "details": {
+                "duration": "1s",
+                "loop": true
+            }
+        }
+    ]
+}

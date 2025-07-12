@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Fullscreen Pomodoro Timer</title>
+    
+    <!-- ========================================
+    TIMER APP - OPEN SOURCE POMODORO TIMER BY BEAMING MEDIA © Mehboob
+    ========================================
+    
+    FEATURES:
+    - Customizable timer duration (1-60 minutes)
+    - Fullscreen mode with auto-hiding controls
+    - Multiple font options (9 different fonts)
+    - Background color customization (13 colors + gradient)
+    - Timer size adjustment (15-35vw on desktop, 20-30vw on mobile)
+    - Auto-repeat functionality with 3-second cooldown
+    - Haptic feedback (vibration) support
+    - Keyboard shortcuts
+    - Responsive design for all devices
+    - Settings panel with tabbed interface
+    - Local storage for persistent settings
+    
+    CONTRIBUTORS: Please add your name and contribution in the comments below
+    ======================================== -->
+    <!-- Favicon Links -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+    <!-- ========================================
+    FONT IMPORTS - GOOGLE FONTS
+    ========================================
+    Available fonts for timer customization:
+    - Lato (default)
+    - Roboto
+    - Givonic
+    - Raleway
+    - Oswald
+    - Quicksand
+    - Poppins
+    - Orbitron
+    - Montserrat
+    ======================================== -->
+    <link href="https://fonts.googleapis.com/css2?family=Givonic:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
+    <!-- End Favicon Links -->
+    
+    <!-- ========================================
+    CSS STYLES - MAIN STYLING
+    ========================================
+    This section contains all the styling for the timer app including:
+    - Base styles and reset
+    - Layout and positioning
+    - Animations and transitions
+    - Responsive design
+    - Settings panel styling
+    - Interactive elements
+    ======================================== -->
+    <style>
+        /* ========================================
+        BASE STYLES AND RESET
+        ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* ========================================
+        LAYOUT AND POSITIONING
+        ======================================== */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: black; /* Default background color */
+        }
+        /* ========================================
+        BODY STYLING - MAIN CONTAINER
+        ========================================
+        Handles safe area insets for mobile devices
+        Sets up flexbox layout for centering content
+        Disables text selection for better UX
+        ======================================== */
+        body {
+            padding-top: env(safe-area-inset-top); /* Adjust for the status bar */
+            padding-bottom: env(safe-area-inset-bottom); /* Adjust for the bottom safe area */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'Lato', sans-serif; /* Apply Lato Bold to the entire site */
+            font-weight: bold; /* Ensure the font is bold */
+            overflow: hidden; /* Prevent scrolling during intro */
+            
+            /* Disable text selection for the entire app */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        /* ========================================
+        TEXT SELECTION RULES
+        ========================================
+        Allow text selection in settings panel for better UX
+        ======================================== */
+        .settings-panel .info, 
+        .settings-panel .shortcuts {
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            cursor: auto;
+        }
+        /* ========================================
+        INTRO ANIMATION - SPLASH SCREEN
+        ========================================
+        Shows app title for 4 seconds then fades out
+        Clickable to skip intro
+        ======================================== */
+        .intro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black; /* Intro background */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5vw;
+            font-weight: bold;
+            font-family: 'Lato', sans-serif; /* Apply Lato Bold to the intro */
+            z-index: 1000;
+            animation: fadeOut 4s forwards; /* Fade out over 4 seconds */
+            cursor: pointer; /* Indicate that the intro is clickable */
+        }
+        /* ========================================
+        ANIMATION KEYFRAMES
+        ========================================
+        fadeOut: Intro fade out animation
+        fadeIn: Main content fade in animation
+        ======================================== */
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        
+        /* ========================================
+        MAIN CONTENT CONTAINER
+        ========================================
+        Contains timer, controls, and title
+        Fades in after intro animation
+        ======================================== */
+        .content {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            animation-delay: 4s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        /* ========================================
+        TITLE STYLING
+        ========================================
+        App title positioned at top of screen
+        ======================================== */
+        .title {
+            font-size: 3vw;
+            font-weight: bold;
+            font-family: 'Lato', sans-serif;
+            color: yellow;
+            text-align: center;
+            width: 100%;
+            cursor: pointer;
+            position: absolute;
+            top: 5%;
+        }
+        /* ========================================
+        TIMER DISPLAY - MAIN TIMER ELEMENT
+        ========================================
+        Centered timer display with customizable font size
+        Clickable to reset timer when it reaches 00:00
+        ======================================== */
+        .timer {
+            font-size: 30vw;
+            font-weight: bold;
+            font-family: 'Lato', sans-serif;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        /* ========================================
+        TIMER FLASH ANIMATION
+        ========================================
+        Yellow flash effect for timer reset and auto-repeat
+        ======================================== */
+        @keyframes yellowFlash {
+            0% { color: white; }
+            50% { color: yellow; }
+            100% { color: white; }
+        }
+        .flash {
+            animation: yellowFlash 0.5s ease-in-out; /* Yellow flash animation */
+        }
+        /* ========================================
+        CONTROL BUTTONS - START/PAUSE, PRESETS
+        ========================================
+        Dynamic positioning based on timer size
+        Auto-hide in fullscreen mode
+        ======================================== */
+        .controls {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            opacity: 1;
+            transition: opacity 0.3s, bottom 0.3s ease;
+            z-index: 100;
+        }
+        /* ========================================
+        CONTROL BUTTON STYLING
+        ========================================
+        Yellow buttons with hover effects
+        ======================================== */
+        .controls button {
+            background: yellow;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border-radius: 10px;
+            min-width: 120px;
+            text-align: center;
+            color: black;
+        }
+        /* ========================================
+        SLIDER CONTAINER - TIMER DURATION CONTROL
+        ========================================
+        Custom slider for adjusting timer duration (1-60 minutes)
+        Dynamic positioning based on timer size
+        ======================================== */
+        .slider-container {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 1;
+            transition: opacity 0.3s, bottom 0.3s ease;
+            z-index: 100;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            width: 240px;
+        }
+
+        /* Slider track styling */
+        .slider-container input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            overflow: hidden;
+            transition: height 0.2s ease;
+        }
+
+        /* Slider track - Firefox */
+        .slider-container input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            border: none;
+        }
+
+        /* Slider thumb - Webkit */
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: yellow;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.3);
+            position: relative;
+            box-shadow: -200px 0 0 195px yellow;
+        }
+
+        /* Slider thumb - Firefox */
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: yellow;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.3);
+        }
+
+        /* Hover states */
+        .slider-container input[type="range"]:hover {
+            height: 6px;
+        }
+
+        .slider-container input[type="range"]:hover::-webkit-slider-thumb {
+            transform: scale(1.2);
+            box-shadow: -200px 0 0 195px yellow, 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        .slider-container input[type="range"]:hover::-moz-range-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        /* Active states */
+        .slider-container input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.3);
+            box-shadow: -200px 0 0 195px yellow, 0 0 15px rgba(255, 255, 0, 0.6);
+        }
+
+        .slider-container input[type="range"]:active::-moz-range-thumb {
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.6);
+        }
+
+        /* Focus states */
+        .slider-container input[type="range"]:focus {
+            outline: none;
+        }
+
+        .slider-container input[type="range"]:focus::-webkit-slider-thumb {
+            box-shadow: -200px 0 0 195px yellow, 0 0 0 3px rgba(255, 255, 0, 0.3);
+        }
+
+        .slider-container input[type="range"]:focus::-moz-range-thumb {
+            box-shadow: 0 0 0 3px rgba(255, 255, 0, 0.3);
+        }
+
+        /* Value display */
+        .slider-container span {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            min-width: 80px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .slider-container:hover span {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Progress bar effect */
+        .slider-container input[type="range"] {
+            background: linear-gradient(to right, 
+                yellow 0%, 
+                yellow var(--progress, 50%), 
+                rgba(255, 255, 255, 0.1) var(--progress, 50%), 
+                rgba(255, 255, 255, 0.1) 100%
+            );
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 5%;
+            right: 5%;
+            background: yellow;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 10px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            color: black;
+        }
+        body.hide-cursor * {
+            cursor: none !important;
+        }
+        .hide-controls {
+            opacity: 0 !important;
+            pointer-events: none; /* Prevent interaction with hidden buttons */
+        }
+        .hide-title {
+            display: none; /* Hide title in full screen */
+        }
+        /* Hide cursor after 4 seconds of inactivity */
+        body.hide-cursor {
+            cursor: none;
+        }
+        
+        /* Hide cursor in fullscreen mode after 4 seconds */
+        body.hide-cursor * {
+            cursor: none !important;
+        }
+
+        /* Settings Button */
+        .settings-btn {
+            position: fixed;
+            top: 5%;
+            left: 5%;
+            background: none;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            color: yellow;
+            z-index: 1001;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .settings-btn:hover {
+            transform: rotate(30deg);
+            opacity: 0.8;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 10%;
+            left: -350px;
+            width: 340px;
+            max-height: 80vh;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 0, 0.1);
+            transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+            z-index: 1000;
+            opacity: 0;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: yellow rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .settings-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        .settings-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        .settings-panel::-webkit-scrollbar-thumb {
+            background: yellow;
+            border-radius: 3px;
+        }
+        .settings-panel::-webkit-scrollbar-thumb:hover {
+            background: #ffcc00;
+        }
+        .settings-panel.open {
+            left: 5%;
+            opacity: 1;
+        }
+
+        /* Settings Header */
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 0, 0.2);
+        }
+        .settings-header h2 {
+            font-size: 1.5rem;
+            color: yellow;
+            margin: 0;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: yellow;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 0.8;
+            transition: transform 0.3s ease;
+        }
+        .close-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px 15px;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 0, 0.1);
+        }
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+        .tab-btn svg {
+            opacity: 0.7;
+        }
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .tab-btn.active {
+            background: rgba(255, 255, 0, 0.2);
+            color: yellow;
+            border-bottom: 2px solid yellow;
+        }
+        .tab-btn.active svg {
+            opacity: 1;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        /* Font Section */
+        .font-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .font-option {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            position: relative;
+        }
+        .font-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .font-option.active {
+            background: rgba(255, 255, 0, 0.1);
+            border-left: 3px solid yellow;
+        }
+        .font-demo {
+            font-size: 1.5rem;
+            width: 80px;
+            text-align: center;
+        }
+        .font-name {
+            flex-grow: 1;
+            padding-left: 15px;
+        }
+        .check-mark {
+            color: yellow;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .font-option.active .check-mark,
+        .color-circle.active .check-mark {
+            opacity: 1;
+        }
+
+        /* Background Color Section */
+        .color-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .color-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease, border 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .color-circle:hover {
+            transform: scale(1.15);
+            border: 2px solid white;
+        }
+        .color-circle.active {
+            border: 3px solid yellow;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+        .color-circle .check-mark {
+            color: white;
+            font-size: 1.5rem;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Shortcuts Section */
+        .shortcuts {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .shortcut-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .shortcut-item kbd {
+            background: #333;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            color: yellow;
+            font-size: 0.9rem;
+            min-width: 40px;
+            text-align: center;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .shortcut-item span {
+            flex-grow: 1;
+        }
+
+        /* Info Section */
+        .info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+        .info-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+        }
+        .info h3 {
+            color: yellow;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .info h4 {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 10px 0 5px 0;
+            font-size: 1rem;
+        }
+        .info p {
+            margin: 0;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        .feature-list li svg {
+            color: yellow;
+            flex-shrink: 0;
+        }
+        .community-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(255, 255, 0, 0.2);
+        }
+        .discord-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #5865F2;
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .discord-btn:hover {
+            background: #4752c4;
+            transform: translateY(-2px);
+        }
+        .version-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(255, 255, 0, 0.2);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Download Section */
+        .download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: yellow;
+            border: none;
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            color: black;
+            transition: background 0.3s ease, transform 0.2s ease;
+            margin-bottom: 20px;
+        }
+        .download-btn:hover {
+            background: #ffcc00;
+            transform: translateY(-2px);
+        }
+        .download-btn:active {
+            transform: translateY(1px);
+        }
+        .download-info {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .platform-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .platform-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .platform-icon svg {
+            margin-bottom: 5px;
+            color: yellow;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .timer {
+                font-size: 25vw;
+            }
+            
+            .controls {
+                bottom: 10%;
+            }
+            
+            .slider-container {
+                width: 200px;
+                bottom: 20%;
+            }
+            
+            .controls button {
+                padding: 8px 16px;
+                font-size: 1.2rem;
+                min-width: 100px;
+            }
+            .slider-container input[type="range"] {
+                height: 3px;
+            }
+            .slider-container input[type="range"]::-webkit-slider-thumb {
+                width: 14px;
+                height: 14px;
+            }
+            .slider-container input[type="range"]::-moz-range-thumb {
+                width: 14px;
+                height: 14px;
+            }
+            .slider-container span {
+                font-size: 1rem;
+                padding: 3px 10px;
+            }
+        }
+
+        /* Animation for settings panel opening */
+        @keyframes slideIn {
+            from { left: -350px; opacity: 0; }
+            to { left: 5%; opacity: 1; }
+        }
+        .settings-panel.opening {
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Tooltip for checkmark selection */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 1002;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        /* Add highlight effect for active selections */
+        .highlight-effect {
+            animation: highlightPulse 1s ease;
+        }
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.7); }
+            50% { box-shadow: 0 0 0 5px rgba(255, 255, 0, 0.3); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 0, 0); }
+        }
+
+        /* Clock resize controls */
+        .resize-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .resize-btn {
+            background: yellow;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: black;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease, transform 0.2s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+        .resize-btn:hover {
+            background: #ffcc00;
+            transform: scale(1.05);
+        }
+        .resize-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            transform: none;
+        }
+        .resize-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+
+        /* Repeat toggle */
+        .repeat-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .toggle-switch.active {
+            background: yellow;
+        }
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(26px);
+        }
+        .repeat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+
+        /* Gradient Animation */
+        .gradient-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(40deg, var(--gradient-start, rgb(108, 0, 162)), var(--gradient-end, rgb(0, 17, 82)));
+            overflow: hidden;
+        }
+
+        .gradient-blobs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            filter: blur(40px);
+        }
+
+        .gradient-blob {
+            position: absolute;
+            border-radius: 50%;
+            mix-blend-mode: hard-light;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .gradient-blob:nth-child(1) {
+            background: radial-gradient(circle at center, rgba(18, 113, 255, 0.8) 0, rgba(18, 113, 255, 0) 50%);
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .gradient-blob:nth-child(2) {
+            background: radial-gradient(circle at center, rgba(221, 74, 255, 0.8) 0, rgba(221, 74, 255, 0) 50%);
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            animation-delay: -3s;
+            transform-origin: calc(50% - 400px);
+        }
+
+        .gradient-blob:nth-child(3) {
+            background: radial-gradient(circle at center, rgba(100, 220, 255, 0.8) 0, rgba(100, 220, 255, 0) 50%);
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            animation-delay: -6s;
+            transform-origin: calc(50% + 400px);
+        }
+
+        .gradient-blob:nth-child(4) {
+            background: radial-gradient(circle at center, rgba(200, 50, 50, 0.8) 0, rgba(200, 50, 50, 0) 50%);
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            animation-delay: -9s;
+            transform-origin: calc(50% - 200px);
+            opacity: 0.7;
+        }
+
+        .gradient-blob:nth-child(5) {
+            background: radial-gradient(circle at center, rgba(180, 180, 50, 0.8) 0, rgba(180, 180, 50, 0) 50%);
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            animation-delay: -12s;
+            transform-origin: calc(50% - 800px) calc(50% + 800px);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(5%, 5%) scale(1.1);
+            }
+            50% {
+                transform: translate(0, 10%) scale(1);
+            }
+            75% {
+                transform: translate(-5%, 5%) scale(0.9);
+            }
+        }
+
+        .gradient-interactive {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle at center, rgba(140, 100, 255, 0.8) 0, rgba(140, 100, 255, 0) 50%);
+            mix-blend-mode: hard-light;
+            opacity: 0.7;
+            pointer-events: none;
+            transition: transform 0.1s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro title that fades out after 4 seconds -->
+    <div class="intro" id="intro">TIMER</div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="title">TIMER</div>
+        <div class="timer" id="timer">25:00</div>
+        <div class="controls" id="controls">
+            <button id="pause">Start</button>
+            <button id="set25">25 min</button>
+            <button id="set5">5 min</button>
+        </div>
+        <div class="slider-container" id="slider-container">
+            <input type="range" id="minutesSlider" min="1" max="60" value="25">
+            <span id="sliderValue">25 min</span>
+        </div>
+        <button class="fullscreen-btn" id="fullscreen">Fullscreen</button>
+    </div>
+
+    <!-- Settings Button -->
+    <button class="settings-btn" id="settingsBtn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+    </button>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+        <h2>Settings</h2>
+            <button class="close-btn" id="closeSettings">×</button>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="font">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 7V4h16v3"></path><path d="M9 20h6"></path><path d="M12 4v16"></path>
+                </svg>
+                Font
+            </button>
+            <button class="tab-btn" data-tab="background">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path>
+                </svg>
+                Background
+            </button>
+            <button class="tab-btn" data-tab="shortcuts">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                </svg>
+                Shortcuts
+            </button>
+            <button class="tab-btn" data-tab="info">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Info
+            </button>
+            <button class="tab-btn" data-tab="download">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
+            </button>
+        </div>
+        
+        <div class="tab-content active" id="fontTab">
+            <p class="section-description">Customize your timer display</p>
+            
+            <div class="resize-controls">
+                <span class="resize-label">Timer Size:</span>
+                <button class="resize-btn" id="decreaseSize">-</button>
+                <button class="resize-btn" id="increaseSize">+</button>
+            </div>
+            
+            <div class="repeat-toggle">
+                <span class="repeat-label">Auto Repeat:</span>
+                <div class="toggle-switch" id="repeatToggle">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            
+            <p class="section-description" style="margin-top: 20px;">Choose a font style for your timer display</p>
+            <div class="font-preview">
+                <div class="font-option" style="font-family: 'Lato', sans-serif;" data-font="Lato">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Lato</span>
+                    <span class="check-mark">✓</span>
+                </div>
+                <div class="font-option" style="font-family: 'Roboto', sans-serif;" data-font="Roboto">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Roboto</span>
+                    <span class="check-mark"></span>
+                </div>
+                <div class="font-option" style="font-family: 'Givonic', sans-serif;" data-font="Givonic">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Givonic</span>
+                    <span class="check-mark"></span>
+                </div>
+                <div class="font-option" style="font-family: 'Raleway', sans-serif;" data-font="Raleway">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Raleway</span>
+                    <span class="check-mark"></span>
+                </div>
+                <div class="font-option" style="font-family: 'Oswald', sans-serif;" data-font="Oswald">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Oswald</span>
+                    <span class="check-mark"></span>
+                </div>
+                <div class="font-option" style="font-family: 'Quicksand', sans-serif;" data-font="Quicksand">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Quicksand</span>
+                    <span class="check-mark"></span>
+                </div>
+                <div class="font-option" style="font-family: 'Poppins', sans-serif;" data-font="Poppins">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Poppins</span>
+                    <span class="check-mark"></span>
+                </div>
+                <div class="font-option" style="font-family: 'Orbitron', sans-serif;" data-font="Orbitron">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Orbitron</span>
+                    <span class="check-mark"></span>
+                </div>
+                <div class="font-option" style="font-family: 'Montserrat', sans-serif;" data-font="Montserrat">
+                    <span class="font-demo">12:34</span>
+                    <span class="font-name">Montserrat</span>
+                    <span class="check-mark"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="backgroundTab">
+            <p class="section-description">Select a background color</p>
+            <div class="color-preview">
+                <div class="color-circle active" style="background-color: #000000;" data-color="#000000">
+                    <span class="check-mark">✓</span>
+            </div>
+                <div class="color-circle" style="background-color: #B3CBB9;" data-color="#B3CBB9">
+                    <span class="check-mark"></span>
+        </div>
+                <div class="color-circle" style="background-color: #264027;" data-color="#264027">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #FE4A49;" data-color="#FE4A49">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #2AB7CA;" data-color="#2AB7CA">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #3B3355;" data-color="#3B3355">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #D81E5B;" data-color="#D81E5B">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #41EAD4;" data-color="#41EAD4">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #CA9CE1;" data-color="#CA9CE1">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #C16200;" data-color="#C16200">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #4E0110;" data-color="#4E0110">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #6369D1;" data-color="#6369D1">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle" style="background-color: #FFB20F;" data-color="#FFB20F">
+                    <span class="check-mark"></span>
+                </div>
+                <div class="color-circle gradient-option" data-color="gradient">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                        <path d="M2 17l10 5 10-5"></path>
+                        <path d="M2 12l10 5 10-5"></path>
+                    </svg>
+                    <span class="check-mark"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="shortcutsTab">
+            <p class="section-description">Keyboard shortcuts for faster access</p>
+            <div class="shortcuts">
+                <div class="shortcut-item">
+                    <kbd>Space</kbd>
+                    <span>Start/Pause Timer</span>
+            </div>
+                <div class="shortcut-item">
+                    <kbd>F</kbd>
+                    <span>Toggle Fullscreen</span>
+        </div>
+                <div class="shortcut-item">
+                    <kbd>R</kbd>
+                    <span>Reset to 25 Minutes</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>B</kbd>
+                    <span>Set to 5 Minutes Break</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>S</kbd>
+                    <span>Toggle Settings Panel</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="infoTab">
+            <div class="info">
+                <div class="info-header">
+                    <img src="favicon-32x32.png" alt="Timer Logo" class="info-logo">
+                    <h3>TIMER BY BEAMING MEDIA</h3>
+                </div>
+                <p>A simple Pomodoro timer designed to help you stay focused and productive.</p>
+                
+                <h4>Features:</h4>
+                <ul class="feature-list">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                        Customizable timer duration
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        Fullscreen mode
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        Font and background customization
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                        </svg>
+                        Haptic feedback (vibration) support
+                    </li>
+                </ul>
+                
+                <div class="community-section">
+                <p>Join our Discord community for support and updates:</p>
+                    <a href="https://discord.gg/CDAmXSaXQF" target="_blank" class="discord-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"></path>
+                        </svg>
+                        Join Discord Server
+                    </a>
+            </div>
+                
+                <div class="version-info">
+                    <p>Version 1.13.0</p>
+                    <p>© 2025 Timer by Beaming Media</p>
+        </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="downloadTab">
+            <p class="section-description">Download the timer app for offline use</p>
+            <button class="download-btn" id="downloadBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Timer App
+            </button>
+            <div class="download-info">
+                <p>Available for all major platforms:</p>
+                <div class="platform-icons">
+                    <span class="platform-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        Desktop
+                    </span>
+                    <span class="platform-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                        Mobile
+                    </span>
+                    <span class="platform-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle>
+                        </svg>
+                        PWA
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio element for the custom sound effect -->
+    <audio id="timerSound" src="timer-end.mp3" preload="auto"></audio>
+
+    <!-- ========================================
+    JAVASCRIPT - MAIN FUNCTIONALITY
+    ========================================
+    This section contains all the JavaScript functionality:
+    - Timer logic and countdown
+    - Fullscreen controls
+    - Settings panel management
+    - Local storage handling
+    - Keyboard shortcuts
+    - Haptic feedback
+    - Auto-repeat functionality
+    ======================================== -->
+    <script>
+        /* ========================================
+        HAPTIC FEEDBACK - VIBRATION SUPPORT
+        ========================================
+        Provides tactile feedback for user interactions
+        Falls back gracefully on devices without vibration API
+        ======================================== */
+        function vibrate(duration = 50) {
+            // Check if vibration API is supported
+            if ("vibrate" in navigator) {
+                navigator.vibrate(duration);
+            }
+        }
+
+        /* ========================================
+        UTILITY FUNCTIONS
+        ========================================
+        Test vibration and prevent context menu
+        ======================================== */
+        function testVibration() {
+            vibrate([100, 50, 100, 50, 100]);
+        }
+
+        // Prevent right-click context menu for better UX
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        /* ========================================
+        GLOBAL VARIABLES - TIMER STATE
+        ========================================
+        timeLeft: Current time remaining in seconds
+        timerInterval: Interval for countdown
+        isPaused: Timer pause state
+        hideTimeout: Timeout for hiding controls in fullscreen
+        previousTimeLeft: Last timer duration for reset/repeat
+        repeatEnabled: Auto-repeat setting (from localStorage)
+        ======================================== */
+        let timeLeft = 25 * 60;
+        let timerInterval;
+        let isPaused = true;
+        let hideTimeout;
+        let previousTimeLeft = timeLeft; // Store the previous timer value
+        let repeatEnabled = false; // Will be initialized from localStorage in DOMContentLoaded
+
+        /* ========================================
+        INTRO SKIP FUNCTIONALITY
+        ========================================
+        Allows users to skip the intro animation by clicking
+        ======================================== */
+        function skipIntro() {
+            const intro = document.getElementById('intro');
+            intro.style.animation = 'none'; // Stop the fade-out animation
+            intro.style.opacity = '0'; // Hide the intro immediately
+            intro.style.visibility = 'hidden'; // Ensure the intro is hidden
+
+            const content = document.querySelector('.content');
+            content.style.animation = 'fadeIn 1s forwards'; // Fade in the content immediately
+        }
+
+        // Add click/tap event to skip the intro
+        document.getElementById('intro').addEventListener('click', skipIntro);
+
+        /* ========================================
+        TIMER DISPLAY UPDATE FUNCTION
+        ========================================
+        Updates timer display and handles timer completion
+        Includes auto-repeat functionality with 3-second cooldown
+        ======================================== */
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const seconds = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${minutes}:${seconds}`;
+
+            // Play sound and vibrate when timer reaches 00:00
+            if (timeLeft === 0) {
+                const sound = document.getElementById('timerSound');
+                sound.play();
+                vibrate([100, 50, 100, 50, 100]); // Triple vibration when timer completes
+                clearInterval(timerInterval);
+                document.getElementById('pause').innerText = 'Start';
+                
+                // Check if repeat is enabled
+                if (window.repeatEnabled) {
+                    // Add visual feedback for auto repeat
+                    const timerElement = document.getElementById('timer');
+                    timerElement.classList.add('flash');
+                    
+                    // Show cooldown message
+                    const originalText = timerElement.innerText;
+                    timerElement.innerText = '3';
+                    
+                    // 3-second cooldown before restarting
+                    setTimeout(() => {
+                        timerElement.innerText = '2';
+                    }, 1000);
+                    
+                    setTimeout(() => {
+                        timerElement.innerText = '1';
+                    }, 2000);
+                    
+                    setTimeout(() => {
+                        // Reset timer to previous value and start automatically
+                        timeLeft = previousTimeLeft;
+                        updateTimerDisplay();
+                        isPaused = false;
+                        document.getElementById('pause').innerText = 'Pause';
+                        startTimer();
+                        
+                        // Remove flash effect
+                        timerElement.classList.remove('flash');
+                    }, 3000);
+                }
+            }
+        }
+
+        /* ========================================
+        TIMER START FUNCTION
+        ========================================
+        Starts the countdown timer with 1-second intervals
+        ======================================== */
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!isPaused && timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        /* ========================================
+        FULLSCREEN TOGGLE FUNCTION
+        ========================================
+        Handles entering/exiting fullscreen mode
+        Includes auto-hiding controls and cursor
+        ======================================== */
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                document.querySelector('.title').classList.add('hide-title'); // Hide title in full screen
+                hideAllButtons(); // Hide all buttons in fullscreen
+                document.getElementById('fullscreen').innerText = 'Fullscreened'; // Change button text
+                document.documentElement.style.background = document.body.style.background; // Apply background color to the entire viewport
+                vibrate(30); // Short vibration when entering fullscreen
+            } else {
+                document.exitFullscreen();
+                document.querySelector('.title').classList.remove('hide-title'); // Show title when exiting full screen
+                showAllButtons(); // Show all buttons when exiting fullscreen
+                document.getElementById('fullscreen').innerText = 'Fullscreen'; // Change button text
+                vibrate(30); // Short vibration when exiting fullscreen
+            }
+        }
+
+        /* ========================================
+        CONTROL VISIBILITY FUNCTIONS
+        ========================================
+        hideAllButtons: Hides all controls in fullscreen mode
+        showAllButtons: Shows all controls when exiting fullscreen
+        ======================================== */
+        function hideAllButtons() {
+            document.getElementById('controls').classList.add('hide-controls');
+            document.getElementById('slider-container').classList.add('hide-controls');
+            document.getElementById('fullscreen').classList.add('hide-controls');
+            document.getElementById('settingsBtn').classList.add('hide-controls');
+        }
+
+        function showAllButtons() {
+            document.getElementById('controls').classList.remove('hide-controls');
+            document.getElementById('slider-container').classList.remove('hide-controls');
+            document.getElementById('fullscreen').classList.remove('hide-controls');
+            document.getElementById('settingsBtn').classList.remove('hide-controls');
+        }
+
+        /* ========================================
+        SHOW CONTROLS FUNCTION - FULLSCREEN INTERACTION
+        ========================================
+        Shows controls on mouse movement in fullscreen mode
+        Auto-hides controls and cursor after 4 seconds of inactivity
+        ======================================== */
+        function showControls() {
+            if (document.fullscreenElement) {
+                document.getElementById('controls').classList.remove('hide-controls');
+                document.getElementById('slider-container').classList.remove('hide-controls');
+                document.getElementById('fullscreen').classList.remove('hide-controls');
+                document.getElementById('settingsBtn').classList.remove('hide-controls');
+                
+                // Remove hide-cursor class to show cursor
+                document.body.classList.remove('hide-cursor');
+
+                // Clear the previous timeout
+                clearTimeout(hideTimeout);
+
+                // Set a new timeout to hide the controls and cursor after 4 seconds
+                hideTimeout = setTimeout(() => {
+                    hideAllButtons();
+                    document.body.classList.add('hide-cursor');
+                }, 4000); // 4 seconds
+            } else {
+                // Outside fullscreen, show controls immediately on hover or click
+                document.getElementById('controls').classList.remove('hide-controls');
+                document.getElementById('slider-container').classList.remove('hide-controls');
+                document.getElementById('fullscreen').classList.remove('hide-controls');
+                document.getElementById('settingsBtn').classList.remove('hide-controls');
+                
+                // Remove hide-cursor class outside fullscreen
+                document.body.classList.remove('hide-cursor');
+            }
+        }
+
+        /* ========================================
+        EVENT LISTENERS - MOUSE/TOUCH INTERACTION
+        ========================================
+        Shows controls on mouse movement or touch
+        ======================================== */
+        // Show controls on mousemove or touchstart
+        document.addEventListener('mousemove', showControls);
+        document.addEventListener('touchstart', showControls);
+
+        /* ========================================
+        FULLSCREEN CHANGE EVENT HANDLER
+        ========================================
+        Handles entering/exiting fullscreen mode
+        Manages control visibility and cursor hiding
+        ======================================== */
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                showAllButtons(); // Show all buttons when exiting fullscreen
+                document.getElementById('fullscreen').innerText = 'Fullscreen'; // Change button text
+                document.body.classList.remove('hide-cursor'); // Show cursor when exiting fullscreen
+            } else {
+                hideAllButtons(); // Hide all buttons when entering fullscreen
+                document.getElementById('fullscreen').innerText = 'Fullscreened'; // Change button text
+                // Start cursor hiding timer when entering fullscreen
+                setTimeout(() => {
+                    if (document.fullscreenElement) {
+                        document.body.classList.add('hide-cursor');
+                    }
+                }, 4000);
+            }
+        });
+
+        /* ========================================
+        TIMER RESET FUNCTION
+        ========================================
+        Resets timer to previous duration when clicked at 00:00
+        Includes visual feedback with yellow flash
+        ======================================== */
+        function resetTimer() {
+            if (timeLeft === 0) {
+                timeLeft = previousTimeLeft; // Reset to previous value
+                updateTimerDisplay();
+                vibrate(30); // Short vibration on reset
+
+                // Add yellow flash animation
+                const timerElement = document.getElementById('timer');
+                timerElement.classList.add('flash');
+
+                // Remove the animation class after it finishes
+                setTimeout(() => {
+                    timerElement.classList.remove('flash');
+                }, 500); // 0.5 seconds (matches animation duration)
+            }
+        }
+
+        // Click or tap on the timer to reset (do not start)
+        document.getElementById('timer').addEventListener('click', resetTimer);
+
+        /* ========================================
+        SLIDER EVENT HANDLER
+        ========================================
+        Updates timer duration when slider is moved
+        Includes haptic feedback
+        ======================================== */
+        document.getElementById('minutesSlider').addEventListener('input', (event) => {
+            const minutes = event.target.value;
+            timeLeft = minutes * 60;
+            previousTimeLeft = timeLeft; // Update the previous value
+            document.getElementById('sliderValue').innerText = `${minutes} min`;
+            updateTimerDisplay();
+            vibrate(30); // Short vibration when slider moves
+        });
+
+        /* ========================================
+        CONTROL BUTTON EVENT HANDLERS
+        ========================================
+        Start/Pause: Toggles timer state with haptic feedback
+        Set25: Sets timer to 25 minutes (Pomodoro)
+        Set5: Sets timer to 5 minutes (Short break)
+        ======================================== */
+        document.getElementById('pause').addEventListener('click', () => {
+            isPaused = !isPaused;
+            document.getElementById('pause').innerText = isPaused ? 'Start' : 'Pause';
+            if (!isPaused) {
+                startTimer();
+                vibrate([50, 30, 50]); // Double vibration when starting
+            } else {
+                clearInterval(timerInterval);
+                vibrate(100); // Single vibration when pausing
+            }
+        });
+
+        document.getElementById('set25').addEventListener('click', () => {
+            timeLeft = 25 * 60;
+            previousTimeLeft = timeLeft; // Update the previous value
+            document.getElementById('minutesSlider').value = 25;
+            document.getElementById('sliderValue').innerText = '25 min';
+            updateTimerDisplay();
+            vibrate(30); // Short vibration on preset change
+        });
+
+        document.getElementById('set5').addEventListener('click', () => {
+            timeLeft = 5 * 60;
+            previousTimeLeft = timeLeft; // Update the previous value
+            document.getElementById('minutesSlider').value = 5;
+            document.getElementById('sliderValue').innerText = '5 min';
+            updateTimerDisplay();
+            vibrate(30); // Short vibration on preset change
+        });
+
+        /* ========================================
+        FULLSCREEN BUTTON EVENT HANDLER
+        ========================================
+        Toggles fullscreen mode and shows controls
+        ======================================== */
+        document.getElementById('fullscreen').addEventListener('click', () => {
+            toggleFullscreen();
+            showControls();
+        });
+
+        /* ========================================
+        KEYBOARD SHORTCUTS
+        ========================================
+        Space: Start/Pause timer
+        F: Toggle fullscreen
+        R: Reset to 25 minutes
+        B: Set to 5 minutes (break)
+        V: Test vibration
+        S: Toggle settings panel
+        ======================================== */
+        document.addEventListener('keydown', (event) => {
+            if (event.key === ' ') {
+                event.preventDefault();
+                document.getElementById('pause').click();
+            } else if (event.key.toLowerCase() === 'f') {
+                toggleFullscreen();
+            } else if (event.key.toLowerCase() === 'r') {
+                timeLeft = 25 * 60;
+                previousTimeLeft = timeLeft; // Update the previous value
+                document.getElementById('minutesSlider').value = 25;
+                document.getElementById('sliderValue').innerText = '25 min';
+                updateTimerDisplay();
+                vibrate(30); // Short vibration on reset
+            } else if (event.key.toLowerCase() === 'b') {
+                timeLeft = 5 * 60;
+                previousTimeLeft = timeLeft; // Update the previous value
+                document.getElementById('minutesSlider').value = 5;
+                document.getElementById('sliderValue').innerText = '5 min';
+                updateTimerDisplay();
+                vibrate(30); // Short vibration on break set
+            } else if (event.key.toLowerCase() === 'v') {
+                testVibration(); // Test vibration feature
+            } else if (event.key.toLowerCase() === 's') {
+                event.preventDefault();
+                const isOpening = !settingsPanel.classList.contains('open');
+                settingsPanel.classList.toggle('open');
+                
+                if (isOpening) {
+                    settingsPanel.classList.add('opening');
+                    setTimeout(() => settingsPanel.classList.remove('opening'), 400);
+                }
+                
+                vibrate(30);
+            }
+        });
+
+        /* ========================================
+        SETTINGS PANEL INITIALIZATION
+        ========================================
+        Initializes all settings panel functionality
+        Handles font selection, background colors, and preferences
+        ======================================== */
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsPanel = document.getElementById('settingsPanel');
+            const closeSettings = document.getElementById('closeSettings');
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const fontOptions = document.querySelectorAll('.font-option');
+            const colorCircles = document.querySelectorAll('.color-circle');
+            
+            /* ========================================
+            SETTINGS INITIALIZATION - LOCAL STORAGE
+            ========================================
+            Loads user preferences from localStorage
+            Sets default values for first-time users
+            ======================================== */
+            let currentFont = localStorage.getItem('timerFont') || 'Lato';
+            let currentColor = localStorage.getItem('timerBackgroundColor') || '#000000';
+            let currentTab = localStorage.getItem('lastActiveTab') || 'font';
+            let currentFontSize = localStorage.getItem('timerFontSize') || 30;
+            let repeatEnabled = localStorage.getItem('timerRepeat') === 'true';
+            
+            // Update the global repeatEnabled variable
+            window.repeatEnabled = repeatEnabled;
+            
+            /* ========================================
+            BACKGROUND INITIALIZATION
+            ========================================
+            Sets the initial background color from localStorage
+            ======================================== */
+            // Set default background to black
+            document.body.style.background = currentColor;
+            document.documentElement.style.background = currentColor;
+            
+            /* ========================================
+            SETTINGS INITIALIZATION FUNCTION
+            ========================================
+            Sets up all settings panel elements with current values
+            Marks active selections and initializes controls
+            ======================================== */
+            function initSettings() {
+                // Mark the current font as active
+                fontOptions.forEach(option => {
+                    const font = option.getAttribute('data-font');
+                    if (font === currentFont) {
+                        option.classList.add('active');
+                        option.querySelector('.check-mark').textContent = '✓';
+                    }
+                });
+                
+                // Mark the current color as active
+                colorCircles.forEach(circle => {
+                    const color = circle.getAttribute('data-color');
+                    if (color === currentColor) {
+                        circle.classList.add('active');
+                        circle.querySelector('.check-mark').textContent = '✓';
+                    }
+                });
+                
+                // Set initial active tab
+                setActiveTab(currentTab);
+                
+                // Initialize font size
+                updateTimerFontSize(currentFontSize);
+                
+                // Initialize repeat toggle
+                updateRepeatToggle(repeatEnabled);
+                
+                // Update control positions on startup
+                updateControlPositions(currentFontSize);
+            }
+            
+            // Set active tab with animation
+            function setActiveTab(tabId) {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to the selected tab and content
+                const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
+                const activeContent = document.getElementById(`${tabId}Tab`);
+                
+                if (activeTab && activeContent) {
+                    activeTab.classList.add('active');
+                    activeContent.classList.add('active');
+
+                    // Add highlight effect
+                    activeTab.classList.add('highlight-effect');
+                    setTimeout(() => activeTab.classList.remove('highlight-effect'), 1000);
+                    
+                    // Save last active tab
+                    localStorage.setItem('lastActiveTab', tabId);
+                }
+            }
+            
+            // Toggle settings panel with animation
+        settingsBtn.addEventListener('click', () => {
+                const isOpening = !settingsPanel.classList.contains('open');
+            settingsPanel.classList.toggle('open');
+                
+                if (isOpening) {
+                    settingsPanel.classList.add('opening');
+                    setTimeout(() => settingsPanel.classList.remove('opening'), 400);
+                }
+                
+                vibrate(30);
+            });
+            
+            // Close settings panel button
+            closeSettings.addEventListener('click', () => {
+                settingsPanel.classList.remove('open');
+                vibrate(30);
+        });
+
+        // Close settings panel when clicking outside
+        document.addEventListener('click', (event) => {
+                if (!settingsPanel.contains(event.target) && 
+                    !settingsBtn.contains(event.target) && 
+                    settingsPanel.classList.contains('open')) {
+                settingsPanel.classList.remove('open');
+            }
+        });
+
+            // Switch tabs with animation
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                    setActiveTab(tabId);
+                    vibrate(20);
+            });
+        });
+
+            // Change font style with visual feedback
+        fontOptions.forEach((option) => {
+            option.addEventListener('click', () => {
+                    // Remove active class from all font options
+                    fontOptions.forEach(opt => {
+                        opt.classList.remove('active');
+                        opt.querySelector('.check-mark').textContent = '';
+                    });
+                    
+                    // Add active class to the clicked option
+                    option.classList.add('active');
+                    option.querySelector('.check-mark').textContent = '✓';
+                    option.classList.add('highlight-effect');
+                    
+                    // Apply the selected font
+                const font = option.getAttribute('data-font');
+                document.querySelector('.timer').style.fontFamily = font;
+                    currentFont = font;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('timerFont', font);
+                    
+                    // Add haptic feedback
+                    vibrate(20);
+                    
+                    // Remove highlight effect after animation completes
+                    setTimeout(() => option.classList.remove('highlight-effect'), 1000);
+                    
+                    // Show tooltip
+                    showTooltip(option, 'Font applied!');
+            });
+        });
+
+            // Change background color with visual feedback
+        colorCircles.forEach((circle) => {
+            circle.addEventListener('click', () => {
+                    // Remove active class from all color circles
+                    colorCircles.forEach(c => {
+                        c.classList.remove('active');
+                        c.querySelector('.check-mark').textContent = '';
+                    });
+                    
+                    // Add active class to the clicked circle
+                    circle.classList.add('active');
+                    circle.querySelector('.check-mark').textContent = '✓';
+                    circle.classList.add('highlight-effect');
+                    
+                const color = circle.getAttribute('data-color');
+                    
+                    if (color === 'gradient') {
+                        removeGradientBackground();
+                        createGradientBackground();
+                        createInteractiveGradient();
+                        document.body.style.background = 'transparent';
+                        document.documentElement.style.background = 'transparent';
+                    } else {
+                        removeGradientBackground();
+                        removeInteractiveGradient();
+                document.body.style.background = color;
+                        document.documentElement.style.background = color;
+                    }
+                    
+                    currentColor = color;
+                    localStorage.setItem('timerBackgroundColor', color);
+                    vibrate(20);
+                    
+                    setTimeout(() => circle.classList.remove('highlight-effect'), 1000);
+                    showTooltip(circle, color === 'gradient' ? 'Gradient applied!' : 'Color applied!');
+            });
+        });
+
+            // Download button functionality
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                vibrate(50);
+                window.location.href = 'https://timerbymehboob.netlify.app/downloadpage.html';
+            });
+            
+            // Function to update timer font size
+            function updateTimerFontSize(size) {
+                const timer = document.querySelector('.timer');
+                timer.style.fontSize = `${size}vw`;
+                
+                // Update button states
+                const decreaseBtn = document.getElementById('decreaseSize');
+                const increaseBtn = document.getElementById('increaseSize');
+                
+                const minSize = window.innerWidth <= 768 ? 20 : 15;
+                const maxSize = window.innerWidth <= 768 ? 30 : 35;
+                
+                decreaseBtn.disabled = size <= minSize;
+                increaseBtn.disabled = size >= maxSize;
+                
+                // Update control positions based on timer size
+                updateControlPositions(size);
+            }
+            
+            // Function to update repeat toggle
+            function updateRepeatToggle(enabled) {
+                const toggle = document.getElementById('repeatToggle');
+                if (enabled) {
+                    toggle.classList.add('active');
+                } else {
+                    toggle.classList.remove('active');
+                }
+            }
+            
+            // Function to update control positions based on timer size
+            function updateControlPositions(timerSize) {
+                const controls = document.getElementById('controls');
+                const sliderContainer = document.getElementById('slider-container');
+                
+                // Calculate dynamic positions based on timer size
+                // Timer is centered at 50%, so we position controls below it
+                const timerHeight = timerSize * 0.6; // Approximate timer height in vh
+                const timerBottom = 50 + (timerHeight / 2); // Timer bottom position
+                
+                // Position controls much lower below the timer with generous spacing
+                // Add extra spacing to ensure no overlap even at maximum font size
+                // Slider is now just below the timer, buttons closer to slider
+                const sliderBottom = Math.max(5, 100 - (timerBottom + 25));
+                const controlsBottom = Math.max(2, 100 - (timerBottom + 40));
+                
+                sliderContainer.style.bottom = `${sliderBottom}%`;
+                controls.style.bottom = `${controlsBottom}%`;
+            }
+            
+            // Function to show tooltip
+            function showTooltip(element, text) {
+                // Create tooltip if it doesn't exist
+                let tooltip = document.querySelector('.tooltip');
+                if (!tooltip) {
+                    tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    document.body.appendChild(tooltip);
+        }
+
+                // Set tooltip text and position
+                tooltip.textContent = text;
+                const rect = element.getBoundingClientRect();
+                tooltip.style.top = `${rect.top - 30}px`;
+                tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+                
+                // Show tooltip with animation
+                tooltip.classList.add('visible');
+                
+                // Hide tooltip after delay
+                setTimeout(() => {
+                    tooltip.classList.remove('visible');
+                }, 1500);
+            }
+            
+            // Initialize settings
+            initSettings();
+            
+            // Font size controls
+            document.getElementById('decreaseSize').addEventListener('click', () => {
+                const minSize = window.innerWidth <= 768 ? 20 : 15;
+                if (currentFontSize > minSize) {
+                    currentFontSize--;
+                    updateTimerFontSize(currentFontSize);
+                    localStorage.setItem('timerFontSize', currentFontSize);
+                    vibrate(20);
+                }
+            });
+            
+            document.getElementById('increaseSize').addEventListener('click', () => {
+                const maxSize = window.innerWidth <= 768 ? 30 : 35;
+                if (currentFontSize < maxSize) {
+                    currentFontSize++;
+                    updateTimerFontSize(currentFontSize);
+                    localStorage.setItem('timerFontSize', currentFontSize);
+                    vibrate(20);
+                }
+            });
+            
+            // Repeat toggle
+            document.getElementById('repeatToggle').addEventListener('click', () => {
+                repeatEnabled = !repeatEnabled;
+                window.repeatEnabled = repeatEnabled; // Update global variable
+                updateRepeatToggle(repeatEnabled);
+                localStorage.setItem('timerRepeat', repeatEnabled);
+                vibrate(20);
+                
+                // Show feedback
+                const toggle = document.getElementById('repeatToggle');
+                showTooltip(toggle, repeatEnabled ? 'Auto repeat enabled!' : 'Auto repeat disabled!');
+            });
+            
+            // Add keyboard navigation support
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && settingsPanel.classList.contains('open')) {
+                    settingsPanel.classList.remove('open');
+                    vibrate(30);
+                }
+            });
+
+            // Handle gradient background
+            const gradientOption = document.querySelector('.gradient-option');
+            let gradientBackground = null;
+            let gradientInteractive = null;
+
+            function createGradientBackground() {
+                if (!gradientBackground) {
+                    gradientBackground = document.createElement('div');
+                    gradientBackground.className = 'gradient-background';
+                    
+                    const gradientBlobs = document.createElement('div');
+                    gradientBlobs.className = 'gradient-blobs';
+                    
+                    for (let i = 1; i <= 5; i++) {
+                        const blob = document.createElement('div');
+                        blob.className = `gradient-blob`;
+                        gradientBlobs.appendChild(blob);
+                    }
+                    
+                    gradientBackground.appendChild(gradientBlobs);
+                    document.body.appendChild(gradientBackground);
+                }
+            }
+
+            function removeGradientBackground() {
+                if (gradientBackground) {
+                    gradientBackground.remove();
+                    gradientBackground = null;
+                }
+            }
+
+            function createInteractiveGradient() {
+                if (!gradientInteractive) {
+                    gradientInteractive = document.createElement('div');
+                    gradientInteractive.className = 'gradient-interactive';
+                    gradientBackground.appendChild(gradientInteractive);
+
+                    document.addEventListener('mousemove', (e) => {
+                        const rect = gradientBackground.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        gradientInteractive.style.transform = `translate(${x}px, ${y}px)`;
+                    });
+                }
+            }
+
+            function removeInteractiveGradient() {
+                if (gradientInteractive) {
+                    gradientInteractive.remove();
+                    gradientInteractive = null;
+                }
+            }
+
+            // Initialize background based on saved preference
+            if (currentColor === 'gradient') {
+                createGradientBackground();
+                createInteractiveGradient();
+                document.body.style.background = 'transparent';
+                document.documentElement.style.background = 'transparent';
+            }
+        });
+
+        // Add this to your JavaScript to update the progress bar
+        const minutesSlider = document.getElementById('minutesSlider');
+        
+        function updateSliderProgress() {
+            const progress = (minutesSlider.value - minutesSlider.min) / (minutesSlider.max - minutesSlider.min) * 100;
+            minutesSlider.style.setProperty('--progress', `${progress}%`);
+        }
+
+        minutesSlider.addEventListener('input', updateSliderProgress);
+        // Initial call to set progress bar
+        updateSliderProgress();
+
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
